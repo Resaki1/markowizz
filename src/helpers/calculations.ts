@@ -31,6 +31,18 @@ export const getPortfolioStd = (
   return Math.sqrt(sum1 + sum2);
 };
 
+export const getPortfolioReturn = (
+  assets: Assets,
+  currentPeriod: Period,
+  composition: number[]
+) => {
+  var sum = 0;
+  assets.forEach((x, i) => {
+    sum += x.performance[currentPeriod].return * composition[i];
+  });
+  return sum;
+};
+
 export const getAllStds = (
   assets: Assets,
   currentPeriod: Period,
@@ -45,6 +57,7 @@ export const getAllStds = (
     return {
       composition,
       std: getPortfolioStd(assets, currentPeriod, composition, correlations),
+      return: getPortfolioReturn(assets, currentPeriod, composition),
     };
   });
 

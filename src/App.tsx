@@ -31,22 +31,37 @@ const securities = [
       },
     },
   },
+  {
+    symbol: "DDAIY",
+    performance: {
+      "5Y": {
+        std: 0.0895,
+        return: 0.1452,
+      },
+    },
+  },
 ];
-
-const composition = [0.3, 0.3, 0.4];
 
 const correlations = {
   ING: {
     VNA: -0.2,
     MURGF: 0.12,
+    DDAIY: -0.65,
   },
   VNA: {
     ING: -0.2,
     MURGF: 0.29,
+    DDAIY: 0.42,
   },
   MURGF: {
     ING: 0.12,
     VNA: 0.29,
+    DDAIY: 0.46,
+  },
+  DDAIY: {
+    ING: -0.65,
+    VNA: 0.42,
+    MURGF: 0.46,
   },
 };
 
