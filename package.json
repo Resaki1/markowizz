@@ -10,7 +10,10 @@
   },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-easy-scatter-plot": "^1.0.3",
+    "recharts": "^2.1.16",
+    "sass": "^1.56.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.24",

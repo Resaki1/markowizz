@@ -43,25 +43,31 @@ export const getPortfolioReturn = (
   return sum;
 };
 
-export const getAllStds = (
+export const getAllPortfolios = (
   assets: Assets,
   currentPeriod: Period,
   correlations: Correlations
-) => {
+): {
+  composition: never[];
+  std: number;
+  periodReturn: number;
+}[] => {
   const stepSize = 0.1;
 
   let compositions = [[]];
   generatePortfolioCombinations([], assets.length, compositions, stepSize);
 
-  const stds = compositions.map((composition) => {
+  const portfolios = compositions.map((composition) => {
     return {
       composition,
       std: getPortfolioStd(assets, currentPeriod, composition, correlations),
-      return: getPortfolioReturn(assets, currentPeriod, composition),
+      periodReturn: getPortfolioReturn(assets, currentPeriod, composition),
     };
   });
 
-  console.log(stds);
+  portfolios.shift();
+
+  return portfolios;
 };
 
 const sumOf = (array: number[]) => {
