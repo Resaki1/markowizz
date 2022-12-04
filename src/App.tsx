@@ -44,24 +44,24 @@ const securities: Assets = [
 
 const correlations = {
   ING: {
-    VNA: -0.2,
-    MURGF: 0.12,
-    DDAIY: -0.65,
+    VNA: await getCorrelation("ING", "VNA.FRK"),
+    MURGF: await getCorrelation("ING", "MURGF"),
+    DDAIY: await getCorrelation("ING", "DDAIY"),
   },
-  VNA: {
-    ING: -0.2,
-    MURGF: 0.29,
-    DDAIY: 0.42,
+  "VNA.FRK": {
+    ING: await getCorrelation("VNA.FRK", "ING"),
+    MURGF: await getCorrelation("VNA.FRK", "MURGF"),
+    DDAIY: await getCorrelation("VNA.FRK", "DDAIY"),
   },
   MURGF: {
-    ING: 0.12,
-    VNA: 0.29,
-    DDAIY: 0.46,
+    ING: await getCorrelation("MURGF", "ING"),
+    VNA: await getCorrelation("MURGF", "VNA.FRK"),
+    DDAIY: await getCorrelation("MURGF", "DDAIY"),
   },
   DDAIY: {
-    ING: -0.65,
-    VNA: 0.42,
-    MURGF: 0.46,
+    ING: await getCorrelation("DDAIY", "ING"),
+    VNA: await getCorrelation("DDAIY", "VNA.FRK"),
+    MURGF: await getCorrelation("DDAIY", "MURGF"),
   },
 };
 
