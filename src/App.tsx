@@ -14,7 +14,7 @@ const securities: Assets = [
     },
   },
   {
-    symbol: "VNA",
+    symbol: "VNA.FRK",
     performance: {
       "5Y": {
         std: 0.0982,
@@ -22,7 +22,7 @@ const securities: Assets = [
       },
     },
   },
-  {
+  /* {
     symbol: "MURGF",
     performance: {
       "5Y": {
@@ -39,7 +39,7 @@ const securities: Assets = [
         return: 0.1452,
       },
     },
-  },
+  }, */
 ];
 
 const correlations = {
@@ -52,7 +52,7 @@ const correlations = {
     ING: await getCorrelation("VNA.FRK", "ING"),
     MURGF: await getCorrelation("VNA.FRK", "MURGF"),
     DDAIY: await getCorrelation("VNA.FRK", "DDAIY"),
-  },
+  } /* 
   MURGF: {
     ING: await getCorrelation("MURGF", "ING"),
     VNA: await getCorrelation("MURGF", "VNA.FRK"),
@@ -62,7 +62,7 @@ const correlations = {
     ING: await getCorrelation("DDAIY", "ING"),
     VNA: await getCorrelation("DDAIY", "VNA.FRK"),
     MURGF: await getCorrelation("DDAIY", "MURGF"),
-  },
+  }, */,
 };
 
 console.log(getCorrelation("DDAIY", "MURGF"));
