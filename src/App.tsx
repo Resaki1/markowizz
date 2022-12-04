@@ -22,7 +22,7 @@ const securities: Assets = [
       },
     },
   },
-  /* {
+  {
     symbol: "MURGF",
     performance: {
       "5Y": {
@@ -39,12 +39,12 @@ const securities: Assets = [
         return: 0.1452,
       },
     },
-  }, */
+  },
 ];
 
 const correlations = {
   ING: {
-    VNA: await getCorrelation("ING", "VNA.FRK"),
+    "VNA.FRK": await getCorrelation("ING", "VNA.FRK"),
     MURGF: await getCorrelation("ING", "MURGF"),
     DDAIY: await getCorrelation("ING", "DDAIY"),
   },
@@ -52,20 +52,18 @@ const correlations = {
     ING: await getCorrelation("VNA.FRK", "ING"),
     MURGF: await getCorrelation("VNA.FRK", "MURGF"),
     DDAIY: await getCorrelation("VNA.FRK", "DDAIY"),
-  } /* 
+  },
   MURGF: {
     ING: await getCorrelation("MURGF", "ING"),
-    VNA: await getCorrelation("MURGF", "VNA.FRK"),
+    "VNA.FRK": await getCorrelation("MURGF", "VNA.FRK"),
     DDAIY: await getCorrelation("MURGF", "DDAIY"),
   },
   DDAIY: {
     ING: await getCorrelation("DDAIY", "ING"),
-    VNA: await getCorrelation("DDAIY", "VNA.FRK"),
+    "VNA.FRK": await getCorrelation("DDAIY", "VNA.FRK"),
     MURGF: await getCorrelation("DDAIY", "MURGF"),
-  }, */,
+  },
 };
-
-console.log(getCorrelation("DDAIY", "MURGF"));
 
 const App = () => {
   return (

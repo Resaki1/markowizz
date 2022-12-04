@@ -30,6 +30,7 @@ export const getPortfolioStd = (
       }
     });
   });
+
   return Math.sqrt(sum1 + sum2);
 };
 

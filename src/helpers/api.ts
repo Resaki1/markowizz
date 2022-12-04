@@ -9,14 +9,21 @@ export const getTimeSeriesDaily = async (
   symbol: string
 ): Promise<DailyTimeSeriesAdjusted[]> => {
   const response = retry(async () => {
+    const localStorage = window.localStorage.getItem(symbol);
+    if (localStorage) {
+      return JSON.parse(localStorage) as DailyTimeSeriesAdjusted[];
+    }
     const response = await fetch(
       `${API_URL}TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&outputsize=full`
     );
 
     const data = await response.json();
-    console.log(data);
     if (await data["Note"]) throw new Error("API rate limit exceeded");
 
+    window.localStorage.setItem(
+      symbol,
+      JSON.stringify(data["Time Series (Daily)"])
+    );
     return data["Time Series (Daily)"] as DailyTimeSeriesAdjusted[];
   });
 
