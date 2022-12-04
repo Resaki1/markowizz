@@ -1,5 +1,5 @@
 import "./App.css";
-import { getAllPortfolios } from "./helpers/calculations";
+import { getAllPortfolios, getCorrelation } from "./helpers/calculations";
 import Chart from "./components/Chart";
 import { Assets } from "./types/assets";
 
@@ -64,6 +64,8 @@ const correlations = {
     MURGF: 0.46,
   },
 };
+
+console.log(getCorrelation("DDAIY", "MURGF"));
 
 const App = () => {
   return (

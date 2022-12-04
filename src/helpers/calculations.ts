@@ -1,4 +1,6 @@
 import { Assets, Correlations, Period } from "../types/assets";
+import { getTimeSeriesDaily } from "./api";
+import calculateCorrelation from "calculate-correlation";
 
 export const getPortfolioStd = (
   assets: Assets,
@@ -97,4 +99,44 @@ const generatePortfolioCombinations = (
       );
     }
   }
+};
+
+/* const getAvgAssetPrice = (dailyValues: number[]) => {
+  const sum = dailyValues.reduce((a, b) => a + b, 0);
+  return sum / dailyValues.length;
+};
+
+const getSquaredDeviations = (dailyValues: number[], average: number) => {
+  return dailyValues.map((value) => Math.pow(value - average, 2));
+}; */
+
+function getStandardDeviation(array: number[]) {
+  const n = array.length;
+  const mean = array.reduce((a, b) => a + b) / n;
+  return Math.sqrt(
+    array.map((x) => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n
+  );
+}
+
+export const getCorrelation = async (asset1: string, asset2: string) => {
+  const period = 5;
+  const days = period * 252;
+
+  const dailies1 = Object.entries(await getTimeSeriesDaily(asset1))
+    .slice(0, days)
+    .map((value) => Number.parseFloat(value[1]["4. close"]));
+  const dailies2 = Object.entries(await getTimeSeriesDaily(asset2))
+    .slice(0, days)
+    .map((value) => Number.parseFloat(value[1]["4. close"]));
+
+  const std1 = getStandardDeviation(dailies1);
+  const std2 = getStandardDeviation(dailies2);
+
+  const correlation = calculateCorrelation(dailies1, dailies2);
+
+  console.log(`Standard Deviation ${asset1}: ${std1}`);
+  console.log(`Standard Deviation ${asset2}: ${std2}`);
+  console.log(`Correlation: ${correlation}`);
+
+  return "test";
 };
