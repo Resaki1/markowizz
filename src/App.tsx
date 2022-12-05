@@ -1,46 +1,13 @@
 import "./App.css";
-import { getAllPortfolios, getCorrelation } from "./helpers/calculations";
+import {
+  getAllPortfolios,
+  getAssets,
+  getCorrelation,
+} from "./helpers/calculations";
 import Chart from "./components/Chart";
+import { Suspense, useEffect, useState } from "react";
+import NewAsset from "./components/NewAsset";
 import { Assets } from "./types/assets";
-
-const securities: Assets = [
-  {
-    symbol: "ING",
-    performance: {
-      "5Y": {
-        std: 0.1085,
-        return: -0.0376,
-      },
-    },
-  },
-  {
-    symbol: "VNA.FRK",
-    performance: {
-      "5Y": {
-        std: 0.0982,
-        return: -0.0715,
-      },
-    },
-  },
-  {
-    symbol: "MURGF",
-    performance: {
-      "5Y": {
-        std: 0.119,
-        return: 0.1943,
-      },
-    },
-  },
-  {
-    symbol: "DDAIY",
-    performance: {
-      "5Y": {
-        std: 0.0895,
-        return: 0.1452,
-      },
-    },
-  },
-];
 
 const correlations = {
   ING: {
@@ -66,12 +33,35 @@ const correlations = {
 };
 
 const App = () => {
+  const [symbols, setSymbols] = useState<string[]>([]);
+  const [assets, setAssets] = useState<Assets>([]);
+
+  const addNewAsset = (newAsset: string) => {
+    symbols ? setSymbols([...symbols, newAsset]) : setSymbols([newAsset]);
+  };
+
+  useEffect(() => {
+    const fetchAssets = async () => {
+      const assets = await getAssets(symbols);
+      setAssets(assets);
+    };
+    fetchAssets();
+  }, [symbols]);
+
   return (
     <div className="App">
-      <Chart
-        data={getAllPortfolios(securities, "5Y", correlations)}
-        assets={securities}
-      />
+      <ul>
+        {symbols?.map((asset) => (
+          <li key={asset}>{asset}</li>
+        ))}
+      </ul>
+      <NewAsset addNewAsset={addNewAsset} />
+      {assets.length > 0 && (
+        <Chart
+          data={getAllPortfolios(assets, "5Y", correlations)}
+          assets={assets}
+        />
+      )}
     </div>
   );
 };

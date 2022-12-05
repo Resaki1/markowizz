@@ -1,6 +1,9 @@
-import { Assets, Correlations, Period } from "../types/assets";
+import { Asset, Assets, Correlations, Period } from "../types/assets";
 import { getTimeSeriesDaily } from "./api";
 import calculateCorrelation from "calculate-correlation";
+
+const period = 5;
+const days = period * 252;
 
 export const getPortfolioStd = (
   assets: Assets,
@@ -102,12 +105,17 @@ const generatePortfolioCombinations = (
   }
 };
 
-export const getStandardDeviation = (array: number[]): number => {
+export const getStandardDeviation = (
+  array: number[],
+  mode?: "absolute" | "percent"
+): number => {
   const n = array.length;
   const mean = array.reduce((a, b) => a + b) / n;
-  return Math.sqrt(
+  const std = Math.sqrt(
     array.map((x) => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n
   );
+
+  return mode === "percent" ? std / mean : std;
 };
 
 const getTimeSeries = async (asset: string, days: number) => {
@@ -121,14 +129,37 @@ export const getCorrelation = async (
   asset1: string,
   asset2: string
 ): Promise<number> => {
-  const period = 5;
-  const days = period * 252;
-
   const dailies1 = await getTimeSeries(asset1, days);
   const dailies2 = await getTimeSeries(asset2, days);
 
-  const std1 = getStandardDeviation(dailies1);
-  const std2 = getStandardDeviation(dailies2);
-
   return calculateCorrelation(dailies1, dailies2);
+};
+
+export const getAssetStd = async (symbol: string) => {
+  const timeSeries = await getTimeSeries(symbol, days);
+  return getStandardDeviation(timeSeries, "percent");
+};
+
+export const getAssetReturn = async (symbol: string) => {
+  const timeSeries = await getTimeSeries(symbol, days);
+
+  return (timeSeries[0] - timeSeries[timeSeries.length - 1]) / timeSeries[0];
+};
+
+export const getAssets = async (symbols: string[]): Promise<Assets> => {
+  const assets = await Promise.all(
+    symbols.map(async (symbol) => {
+      return {
+        symbol,
+        performance: {
+          [period + "Y"]: {
+            std: await getAssetStd(symbol),
+            return: await getAssetReturn(symbol),
+          },
+        },
+      } as Asset;
+    })
+  );
+
+  return assets;
 };

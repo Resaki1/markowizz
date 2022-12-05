@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import {
   CartesianGrid,
   Label,
@@ -32,20 +33,22 @@ const Chart = (portfolios: {
   });
 
   return (
-    <div className="scatter__wrapper">
-      <ScatterChart width={920} height={480}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="x" name="stdev" unit="%" type="number">
-          <Label value="Risk (standard deviation)" position={"center"} />
-        </XAxis>
-        <YAxis dataKey="y" name="return" unit="%">
-          <Label value="return" />
-        </YAxis>
-        <ZAxis dataKey="z" name="composition" />
-        <Scatter name="Possible Portfolios" data={chartData} fill="#8884d8" />
-        <Tooltip content={<CustomTooltip active={false} payload={[]} />} />
-      </ScatterChart>
-    </div>
+    <Suspense fallback={<div>Loading...</div>}>
+      <div className="scatter__wrapper">
+        <ScatterChart width={920} height={480}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="x" name="stdev" unit="%" type="number">
+            <Label value="Risk (standard deviation)" position={"center"} />
+          </XAxis>
+          <YAxis dataKey="y" name="return" unit="%">
+            <Label value="return" />
+          </YAxis>
+          <ZAxis dataKey="z" name="composition" />
+          <Scatter name="Possible Portfolios" data={chartData} fill="#8884d8" />
+          <Tooltip content={<CustomTooltip active={false} payload={[]} />} />
+        </ScatterChart>
+      </div>
+    </Suspense>
   );
 };
 
