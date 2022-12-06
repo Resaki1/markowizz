@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useEffect, useState, useTransition } from "react";
 import {
   CartesianGrid,
   Label,
@@ -9,28 +9,41 @@ import {
   YAxis,
   ZAxis,
 } from "recharts";
-import { Assets } from "../types/assets";
+import { getAllPortfolios } from "../helpers/calculations";
+import { Assets, Correlations } from "../types/assets";
 import "./Chart.scss";
 import CustomTooltip from "./CustomTooltip";
 
-const Chart = (portfolios: {
-  data: {
-    composition: never[];
-    std: number;
-    periodReturn: number;
-  }[];
+const Chart = ({
+  correlations,
+  assets,
+}: {
+  correlations: Correlations;
   assets: Assets;
 }) => {
-  const chartData = portfolios.data.map((portfolio) => {
-    return {
-      x: Math.round(portfolio.std * 10000) / 100,
-      y: Math.round(portfolio.periodReturn * 10000) / 100,
-      z: portfolio.composition.map(
-        (position, index) =>
-          ` ${Math.round(position * 100)}% ${portfolios.assets[index].symbol}`
-      ),
+  const [chartData, setChartData] = useState<any>([]);
+  const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    const getPortfolios = async () => {
+      const portfolios = await getAllPortfolios(assets, "5Y", correlations);
+
+      const data = portfolios.map((portfolio) => {
+        return {
+          x: Math.round(portfolio.std * 10000) / 100,
+          y: Math.round(portfolio.periodReturn * 10000) / 100,
+          z: portfolio.composition.map(
+            (position, index) =>
+              ` ${Math.round(position * 100)}% ${assets[index].symbol}`
+          ),
+        };
+      });
+
+      startTransition(() => setChartData(data));
     };
-  });
+
+    getPortfolios();
+  }, [assets, correlations]);
 
   return (
     <Suspense fallback={<div>Loading...</div>}>

@@ -1,3 +1,5 @@
+import { DailyTimeSeriesAdjusted } from "./alphavantage";
+
 export type Asset = {
   symbol: string;
   performance: {
@@ -6,6 +8,7 @@ export type Asset = {
       return: number;
     };
   };
+  timeSeries: number[];
 };
 
 export type Assets = Asset[];

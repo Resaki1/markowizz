@@ -8,7 +8,7 @@ const API_URL = `https://www.alphavantage.co/query?apikey=${API_KEY}&function=`;
 export const getTimeSeriesDaily = async (
   symbol: string
 ): Promise<DailyTimeSeriesAdjusted[]> => {
-  const response = retry(async () => {
+  const response = retry(async (bail: (arg0: Error) => Error) => {
     const localStorage = window.localStorage.getItem(symbol);
     if (localStorage) {
       return JSON.parse(localStorage) as DailyTimeSeriesAdjusted[];
@@ -18,6 +18,10 @@ export const getTimeSeriesDaily = async (
     );
 
     const data = await response.json();
+
+    if (await data["Error Message"])
+      return bail(new Error("Could not find data for " + symbol));
+
     if (await data["Note"]) throw new Error("API rate limit exceeded");
 
     window.localStorage.setItem(

@@ -58,6 +58,7 @@ export const getAllPortfolios = (
   std: number;
   periodReturn: number;
 }[] => {
+  if (assets.length === 0) return [];
   const stepSize = 0.1;
 
   let compositions = [[]];
@@ -125,24 +126,16 @@ const getTimeSeries = async (asset: string, days: number) => {
     .map((value) => Number.parseFloat(value[1]["4. close"]));
 };
 
-export const getCorrelation = async (
-  asset1: string,
-  asset2: string
-): Promise<number> => {
-  const dailies1 = await getTimeSeries(asset1, days);
-  const dailies2 = await getTimeSeries(asset2, days);
+export const getCorrelation = (
+  dailies1: number[],
+  dailies2: number[]
+): number => calculateCorrelation(dailies1, dailies2);
 
-  return calculateCorrelation(dailies1, dailies2);
-};
-
-export const getAssetStd = async (symbol: string) => {
-  const timeSeries = await getTimeSeries(symbol, days);
+export const getAssetStd = async (timeSeries: number[]) => {
   return getStandardDeviation(timeSeries, "percent");
 };
 
-export const getAssetReturn = async (symbol: string) => {
-  const timeSeries = await getTimeSeries(symbol, days);
-
+export const getAssetReturn = async (timeSeries: number[]) => {
   return (
     (timeSeries[0] - timeSeries[timeSeries.length - 1]) /
     timeSeries[timeSeries.length - 1]
@@ -152,14 +145,17 @@ export const getAssetReturn = async (symbol: string) => {
 export const getAssets = async (symbols: string[]): Promise<Assets> => {
   const assets = await Promise.all(
     symbols.map(async (symbol) => {
+      const timeSeries = await getTimeSeries(symbol, days);
+
       return {
         symbol,
         performance: {
           [period + "Y"]: {
-            std: await getAssetStd(symbol),
-            return: await getAssetReturn(symbol),
+            std: await getAssetStd(timeSeries),
+            return: await getAssetReturn(timeSeries),
           },
         },
+        timeSeries,
       } as Asset;
     })
   );
@@ -168,15 +164,18 @@ export const getAssets = async (symbols: string[]): Promise<Assets> => {
 };
 
 export const getCorrelations = async (
-  symbols: string[]
+  assets: Asset[]
 ): Promise<Correlations> => {
   const correlations: Correlations = {};
 
-  symbols.forEach((symbol1) => {
-    correlations[symbol1] = {};
-    symbols.forEach(async (symbol2) => {
-      if (symbol1 !== symbol2) {
-        correlations[symbol1][symbol2] = await getCorrelation(symbol1, symbol2);
+  assets.forEach((asset1) => {
+    correlations[asset1.symbol] = {};
+    assets.forEach(async (asset2) => {
+      if (asset1.symbol !== asset2.symbol) {
+        correlations[asset1.symbol][asset2.symbol] = await getCorrelation(
+          asset1.timeSeries,
+          asset2.timeSeries
+        );
       }
     });
   });

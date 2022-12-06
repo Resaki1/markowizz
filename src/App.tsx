@@ -8,28 +8,35 @@ import {
 import Chart from "./components/Chart";
 import { Suspense, useEffect, useState } from "react";
 import NewAsset from "./components/NewAsset";
-import { Assets, Correlations } from "./types/assets";
+import { Asset, Assets, Correlations } from "./types/assets";
 
 const App = () => {
   const [symbols, setSymbols] = useState<string[]>([]);
-  const [assets, setAssets] = useState<Assets>([]);
-  const [correlations, setCorrelations] = useState<Correlations>({});
+  const [data, setData] = useState<{
+    correlations: Correlations;
+    assets: Asset[];
+  }>({
+    correlations: {},
+    assets: [],
+  });
 
   const addNewAsset = (newAsset: string) => {
     symbols ? setSymbols([...symbols, newAsset]) : setSymbols([newAsset]);
   };
 
   useEffect(() => {
-    const calcCorrelations = async () => {
-      const correlations = await getCorrelations(symbols);
-      setCorrelations(correlations);
-    };
     const fetchAssets = async () => {
-      const assets = await getAssets(symbols);
-      setAssets(assets);
+      return await getAssets(symbols);
     };
-    calcCorrelations();
-    fetchAssets();
+    const calcCorrelations = async (assets: Asset[]) => {
+      return await getCorrelations(assets);
+    };
+
+    fetchAssets().then((assets) => {
+      calcCorrelations(assets).then((correlations) => {
+        setData({ correlations, assets });
+      });
+    });
   }, [symbols]);
 
   return (
@@ -40,12 +47,8 @@ const App = () => {
         ))}
       </ul>
       <NewAsset addNewAsset={addNewAsset} />
-      {assets.length > 0 && (
-        <Chart
-          data={getAllPortfolios(assets, "5Y", correlations)}
-          assets={assets}
-        />
-      )}
+
+      <Chart correlations={data.correlations} assets={data.assets} />
     </div>
   );
 };
