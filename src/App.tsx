@@ -3,48 +3,32 @@ import {
   getAllPortfolios,
   getAssets,
   getCorrelation,
+  getCorrelations,
 } from "./helpers/calculations";
 import Chart from "./components/Chart";
 import { Suspense, useEffect, useState } from "react";
 import NewAsset from "./components/NewAsset";
-import { Assets } from "./types/assets";
-
-const correlations = {
-  ING: {
-    "VNA.FRK": await getCorrelation("ING", "VNA.FRK"),
-    MURGF: await getCorrelation("ING", "MURGF"),
-    DDAIY: await getCorrelation("ING", "DDAIY"),
-  },
-  "VNA.FRK": {
-    ING: await getCorrelation("VNA.FRK", "ING"),
-    MURGF: await getCorrelation("VNA.FRK", "MURGF"),
-    DDAIY: await getCorrelation("VNA.FRK", "DDAIY"),
-  },
-  MURGF: {
-    ING: await getCorrelation("MURGF", "ING"),
-    "VNA.FRK": await getCorrelation("MURGF", "VNA.FRK"),
-    DDAIY: await getCorrelation("MURGF", "DDAIY"),
-  },
-  DDAIY: {
-    ING: await getCorrelation("DDAIY", "ING"),
-    "VNA.FRK": await getCorrelation("DDAIY", "VNA.FRK"),
-    MURGF: await getCorrelation("DDAIY", "MURGF"),
-  },
-};
+import { Assets, Correlations } from "./types/assets";
 
 const App = () => {
   const [symbols, setSymbols] = useState<string[]>([]);
   const [assets, setAssets] = useState<Assets>([]);
+  const [correlations, setCorrelations] = useState<Correlations>({});
 
   const addNewAsset = (newAsset: string) => {
     symbols ? setSymbols([...symbols, newAsset]) : setSymbols([newAsset]);
   };
 
   useEffect(() => {
+    const calcCorrelations = async () => {
+      const correlations = await getCorrelations(symbols);
+      setCorrelations(correlations);
+    };
     const fetchAssets = async () => {
       const assets = await getAssets(symbols);
       setAssets(assets);
     };
+    calcCorrelations();
     fetchAssets();
   }, [symbols]);
 

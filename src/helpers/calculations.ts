@@ -143,7 +143,10 @@ export const getAssetStd = async (symbol: string) => {
 export const getAssetReturn = async (symbol: string) => {
   const timeSeries = await getTimeSeries(symbol, days);
 
-  return (timeSeries[0] - timeSeries[timeSeries.length - 1]) / timeSeries[0];
+  return (
+    (timeSeries[0] - timeSeries[timeSeries.length - 1]) /
+    timeSeries[timeSeries.length - 1]
+  );
 };
 
 export const getAssets = async (symbols: string[]): Promise<Assets> => {
@@ -162,4 +165,21 @@ export const getAssets = async (symbols: string[]): Promise<Assets> => {
   );
 
   return assets;
+};
+
+export const getCorrelations = async (
+  symbols: string[]
+): Promise<Correlations> => {
+  const correlations: Correlations = {};
+
+  symbols.forEach((symbol1) => {
+    correlations[symbol1] = {};
+    symbols.forEach(async (symbol2) => {
+      if (symbol1 !== symbol2) {
+        correlations[symbol1][symbol2] = await getCorrelation(symbol1, symbol2);
+      }
+    });
+  });
+
+  return correlations;
 };
