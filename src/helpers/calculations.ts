@@ -172,9 +172,19 @@ export const getCorrelations = async (
     correlations[asset1.symbol] = {};
     assets.forEach(async (asset2) => {
       if (asset1.symbol !== asset2.symbol) {
+        let timeSeries1 = asset1.timeSeries;
+        let timeSeries2 = asset2.timeSeries;
+
+        // compare the length of the time series, and if one is longer, slice it to the length of the other
+        if (timeSeries1.length > timeSeries2.length) {
+          timeSeries1.splice(timeSeries2.length);
+        } else if (timeSeries2.length > timeSeries1.length) {
+          timeSeries2.splice(timeSeries1.length);
+        }
+
         correlations[asset1.symbol][asset2.symbol] = await getCorrelation(
-          asset1.timeSeries,
-          asset2.timeSeries
+          timeSeries1,
+          timeSeries2
         );
       }
     });

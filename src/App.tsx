@@ -11,7 +11,14 @@ import NewAsset from "./components/NewAsset";
 import { Asset, Assets, Correlations } from "./types/assets";
 
 const App = () => {
-  const [symbols, setSymbols] = useState<string[]>([]);
+  const [symbols, setSymbols] = useState<string[]>([
+    "VNA.FRK",
+    "IBM",
+    "DTGHF",
+    "ING",
+    "DDAIY",
+    "MURGF",
+  ]);
   const [data, setData] = useState<{
     correlations: Correlations;
     assets: Asset[];
