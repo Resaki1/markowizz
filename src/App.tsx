@@ -1,14 +1,9 @@
 import "./App.css";
-import {
-  getAllPortfolios,
-  getAssets,
-  getCorrelation,
-  getCorrelations,
-} from "./helpers/calculations";
+import { getAssets, getCorrelations } from "./helpers/calculations";
 import Chart from "./components/Chart";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import NewAsset from "./components/NewAsset";
-import { Asset, Assets, Correlations } from "./types/assets";
+import { Asset, Correlations } from "./types/assets";
 
 const App = () => {
   const [symbols, setSymbols] = useState<string[]>([
@@ -19,6 +14,7 @@ const App = () => {
     "DDAIY",
     "MURGF",
   ]);
+  const [isPending, startTransition] = useTransition();
   const [data, setData] = useState<{
     correlations: Correlations;
     assets: Asset[];
@@ -28,7 +24,9 @@ const App = () => {
   });
 
   const addNewAsset = (newAsset: string) => {
-    symbols ? setSymbols([...symbols, newAsset]) : setSymbols([newAsset]);
+    startTransition(() =>
+      symbols ? setSymbols([...symbols, newAsset]) : setSymbols([newAsset])
+    );
   };
 
   useEffect(() => {
@@ -48,6 +46,7 @@ const App = () => {
 
   return (
     <div className="App">
+      {isPending && <div>Updating assets</div>}
       <ul>
         {symbols?.map((asset) => (
           <li key={asset}>{asset}</li>
