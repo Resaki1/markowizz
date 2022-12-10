@@ -24,10 +24,14 @@ export const getTimeSeriesDaily = async (
 
     if (await data["Note"]) throw new Error("API rate limit exceeded");
 
-    window.localStorage.setItem(
-      symbol,
-      JSON.stringify(data["Time Series (Daily)"])
-    );
+    try {
+      window.localStorage.setItem(
+        symbol,
+        JSON.stringify(data["Time Series (Daily)"])
+      );
+    } catch (e) {
+      console.log(e);
+    }
     return data["Time Series (Daily)"] as DailyTimeSeriesAdjusted[];
   });
 

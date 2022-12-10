@@ -27,26 +27,78 @@ const Chart = ({
   const [isPending, startTransition] = useTransition();
   const { height, width } = useWindowDimensions();
 
-  useEffect(() => {
-    const getPortfolios = async () => {
-      const portfolios = await getAllPortfolios(assets, "5Y", correlations);
+  useEffect(
+    () =>
+      startTransition(() => {
+        const getPortfolios = async () => {
+          const portfolios = await getAllPortfolios(assets, "5Y", correlations);
 
-      const data = portfolios.map((portfolio) => {
-        return {
-          x: Math.round(portfolio.std * 10000) / 100,
-          y: Math.round(portfolio.periodReturn * 10000) / 100,
-          z: portfolio.composition.map(
-            (position, index) =>
-              ` ${Math.round(position * 100)}% ${assets[index].symbol}`
-          ),
+          let returnSum = 0;
+          let stdSum = 0;
+          let bestReturnPortfolio = { x: 0, y: -1000 };
+          let bestStdPortfolio = { x: 1000, y: 0 };
+          let worstStdPortfolio = { x: -1000, y: 0 };
+          const data = portfolios.map((portfolio, index) => {
+            const std = Math.round(portfolio.std * 10000) / 100;
+            const periodReturn =
+              Math.round(portfolio.periodReturn * 10000) / 100;
+
+            returnSum += periodReturn;
+            stdSum += std;
+            if (periodReturn > bestReturnPortfolio.y)
+              bestReturnPortfolio = { x: std, y: periodReturn };
+            if (std < bestStdPortfolio.x)
+              bestStdPortfolio = { x: std, y: periodReturn };
+            if (std > worstStdPortfolio.x)
+              worstStdPortfolio = { x: std, y: periodReturn };
+
+            return {
+              x: std,
+              y: periodReturn,
+              z: portfolio.composition.map(
+                (position, index) =>
+                  ` ${Math.round(position * 100)}% ${assets[index].symbol}`
+              ),
+            };
+          });
+
+          // calculate the line between the best return and best std portfolio
+          const mBest =
+            (bestReturnPortfolio.y - bestStdPortfolio.y) /
+            (bestReturnPortfolio.x - bestStdPortfolio.x);
+          const bBest = bestReturnPortfolio.y - mBest * bestReturnPortfolio.x;
+
+          // calculate the distance of the worst std portfolio to the line
+          const distanceWorst =
+            Math.abs(
+              mBest * worstStdPortfolio.x - worstStdPortfolio.y + bBest
+            ) / Math.sqrt(mBest * mBest + 1);
+
+          // filter all points from data that are above the line
+          const filteredData = data.filter((point) => {
+            if (point.y >= mBest * point.x + bBest) {
+              return true;
+            } else {
+              const dist =
+                Math.abs(mBest * point.x - point.y + bBest) /
+                Math.sqrt(mBest * mBest + 1);
+              return (
+                Math.pow(
+                  (distanceWorst - dist) / distanceWorst,
+                  assets.length * 2
+                ) > Math.random()
+              );
+            }
+          });
+
+          console.log(filteredData.length, "data points");
+          setChartData(filteredData);
         };
-      });
 
-      startTransition(() => setChartData(data));
-    };
-
-    getPortfolios();
-  }, [assets, correlations]);
+        getPortfolios();
+      }),
+    [assets, correlations]
+  );
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -82,7 +134,7 @@ const Chart = ({
           </XAxis>
           <YAxis
             dataKey="y"
-            name="return"
+            name="return p.a."
             unit="%"
             domain={[
               (dataMin: number) => Math.round(dataMin - 5),

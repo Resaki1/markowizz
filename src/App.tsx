@@ -7,12 +7,14 @@ import { Asset, Correlations } from "./types/assets";
 
 const App = () => {
   const [symbols, setSymbols] = useState<string[]>([
-    "VNA.FRK",
-    "IBM",
-    "DTGHF",
-    "ING",
-    "DDAIY",
     "MURGF",
+    "BAS.FRK",
+    "INN1.FRK",
+    "ALIZF",
+    "BAYA.FRK",
+    /* "DAI.DEX",
+    "VNA.FRK",
+    "DTG.FRK", */
   ]);
   const [isPending, startTransition] = useTransition();
   const [data, setData] = useState<{
@@ -24,9 +26,9 @@ const App = () => {
   });
 
   const addNewAsset = (newAsset: string) => {
-    startTransition(() =>
-      symbols ? setSymbols([...symbols, newAsset]) : setSymbols([newAsset])
-    );
+    symbols
+      ? startTransition(() => setSymbols([...symbols, newAsset]))
+      : startTransition(() => setSymbols([newAsset]));
   };
 
   useEffect(() => {

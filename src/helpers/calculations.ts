@@ -46,7 +46,7 @@ export const getPortfolioReturn = (
   assets.forEach((x, i) => {
     sum += x.performance[currentPeriod].return * composition[i];
   });
-  return sum;
+  return sum / 5;
 };
 
 export const getAllPortfolios = (
@@ -59,7 +59,7 @@ export const getAllPortfolios = (
   periodReturn: number;
 }[] => {
   if (assets.length === 0) return [];
-  const stepSize = 0.1;
+  const stepSize = 0.05;
 
   let compositions = [[]];
   generatePortfolioCombinations([], assets.length, compositions, stepSize);
