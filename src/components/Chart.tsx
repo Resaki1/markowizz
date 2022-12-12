@@ -76,7 +76,10 @@ const Chart = ({
 
           // filter all points from data that are above the line
           const filteredData = data.filter((point) => {
-            if (point.y >= mBest * point.x + bBest) {
+            if (
+              point.y >= mBest * point.x + bBest ||
+              point.z.find((z) => z.includes("100%"))
+            ) {
               return true;
             } else {
               const dist =

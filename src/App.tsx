@@ -7,11 +7,11 @@ import { Asset, Correlations } from "./types/assets";
 
 const App = () => {
   const [symbols, setSymbols] = useState<string[]>([
-    "MURGF",
+    /* "MURGF",
     "BAS.FRK",
     "INN1.FRK",
     "ALIZF",
-    "BAYA.FRK",
+    "BAYA.FRK", */
     /* "DAI.DEX",
     "VNA.FRK",
     "DTG.FRK", */
