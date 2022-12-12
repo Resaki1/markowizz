@@ -75,24 +75,27 @@ const Chart = ({
             ) / Math.sqrt(mBest * mBest + 1);
 
           // filter all points from data that are above the line
-          const filteredData = data.filter((point) => {
-            if (
-              point.y >= mBest * point.x + bBest ||
-              point.z.find((z) => z.includes("100%"))
-            ) {
-              return true;
-            } else {
-              const dist =
-                Math.abs(mBest * point.x - point.y + bBest) /
-                Math.sqrt(mBest * mBest + 1);
-              return (
-                Math.pow(
-                  (distanceWorst - dist) / distanceWorst,
-                  assets.length * 2
-                ) > Math.random()
-              );
-            }
-          });
+          const filteredData =
+            assets.length <= 3
+              ? data
+              : data.filter((point) => {
+                  if (
+                    point.y >= mBest * point.x + bBest ||
+                    point.z.find((z) => z.includes("100%"))
+                  ) {
+                    return true;
+                  } else {
+                    const dist =
+                      Math.abs(mBest * point.x - point.y + bBest) /
+                      Math.sqrt(mBest * mBest + 1);
+                    return (
+                      Math.pow(
+                        (distanceWorst - dist) / distanceWorst,
+                        assets.length * 2
+                      ) > Math.random()
+                    );
+                  }
+                });
 
           console.log(filteredData.length, "data points");
           setChartData(filteredData);
