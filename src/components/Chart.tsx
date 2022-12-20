@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useState, useTransition } from "react";
+import { Suspense, useMemo, useState, useTransition } from "react";
 import {
   CartesianGrid,
   Label,
@@ -33,11 +33,6 @@ const Chart = ({
         const getPortfolios = async () => {
           const portfolios = await getAllPortfolios(assets, "5Y", correlations);
 
-          /* let returnSum = 0;
-          let stdSum = 0;
-          let bestReturnPortfolio = { x: 0, y: -1000 };
-          let bestStdPortfolio = { x: 1000, y: 0 };
-          let worstStdPortfolio = { x: -1000, y: 0 }; */
           let best = { x: 1000, y: -1000 };
           let worst = { x: -1000, y: 1000 };
           const data = portfolios.map((portfolio, index) => {
@@ -51,15 +46,6 @@ const Chart = ({
             if (periodReturn - std < worst.y - worst.x)
               worst = { x: std, y: periodReturn };
 
-            /* returnSum += periodReturn;
-            stdSum += std;
-            if (periodReturn > bestReturnPortfolio.y)
-              bestReturnPortfolio = { x: std, y: periodReturn };
-            if (std < bestStdPortfolio.x)
-              bestStdPortfolio = { x: std, y: periodReturn };
-            if (std > worstStdPortfolio.x)
-              worstStdPortfolio = { x: std, y: periodReturn }; */
-
             return {
               x: std,
               y: periodReturn,
@@ -70,30 +56,13 @@ const Chart = ({
             };
           });
 
-          // calculate the line between the best return and best std portfolio
-          /* const mBest =
-            (bestReturnPortfolio.y - bestStdPortfolio.y) /
-            (bestReturnPortfolio.x - bestStdPortfolio.x);
-          const bBest = bestReturnPortfolio.y - mBest * bestReturnPortfolio.x; */
-
-          // calculate the distance of the worst std portfolio to the line
-          /* const distanceWorst =
-            Math.abs(
-              mBest * worstStdPortfolio.x - worstStdPortfolio.y + bBest
-            ) / Math.sqrt(mBest * mBest + 1); */
-
           // filter all points from data that are above the line
-          const numbPoints = 250;
-          const threshold = numbPoints / data.length;
           const largestDistance = distance(best, worst);
           const filteredData =
             assets.length <= 3
               ? data
               : data.filter((point) => {
-                  if (
-                    /* point.y >= mBest * point.x + bBest || */
-                    point.z.find((z) => z.includes("100%"))
-                  ) {
+                  if (point.z.find((z) => z.includes("100%"))) {
                     return true;
                   } else {
                     const dist = distance(point, best);
@@ -106,24 +75,9 @@ const Chart = ({
                     const random = Math.random();
                     const shouldRender = distCoefficient < random;
 
-                    //if (distPercentage < 0.25 / assets.length) return true;
-
-                    console.log(
-                      point,
-                      best,
-                      `dist: ${dist}, largestDist: ${largestDistance}, dist%: ${distPercentage} random: ${random}, distCoefficient: ${distCoefficient}, shouldRender: ${shouldRender}`
-                    );
+                    if (distPercentage < 0.25 / assets.length) return true;
 
                     return shouldRender;
-                    /* const dist =
-                      Math.abs(mBest * point.x - point.y + bBest) /
-                      Math.sqrt(mBest * mBest + 1);
-                    return (
-                      Math.pow(
-                        (distanceWorst - dist) / distanceWorst,
-                        assets.length * 2
-                      ) > Math.random()
-                    ); */
                   }
                 });
 
