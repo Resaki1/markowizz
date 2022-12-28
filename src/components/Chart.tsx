@@ -10,18 +10,25 @@ import {
   YAxis,
   ZAxis,
 } from "recharts";
-import { distance, getAllPortfolios } from "../helpers/calculations";
+import { distance } from "../helpers/calculations";
 import useWindowDimensions from "../helpers/hooks";
 import { Assets, Correlations } from "../types/assets";
 import "./Chart.scss";
 import CustomTooltip from "./CustomTooltip";
+import MyWorker from "../workers/worker?worker";
+import { wrap } from "comlink";
+
+const worker = new MyWorker();
+const api: any = wrap(worker);
 
 const Chart = ({
   correlations,
   assets,
+  debug_starttime,
 }: {
   correlations: Correlations;
   assets: Assets;
+  debug_starttime: number;
 }) => {
   const [chartData, setChartData] = useState<any>([]);
   const [isPending, startTransition] = useTransition();
@@ -31,7 +38,12 @@ const Chart = ({
     () =>
       startTransition(() => {
         const getPortfolios = async () => {
-          const portfolios = await getAllPortfolios(assets, "5Y", correlations);
+          await api.getAllPortfolios(assets, "5Y", correlations);
+          const portfolios: {
+            composition: never[];
+            std: number;
+            periodReturn: number;
+          }[] = await api.portfolios;
 
           let best = { x: 1000, y: -1000 };
           let worst = { x: -1000, y: 1000 };
@@ -57,7 +69,8 @@ const Chart = ({
           });
 
           // filter all points from data that are above the line
-          const largestDistance = distance(best, worst);
+          await api.distance(best, worst);
+          const largestDistance = await api.dist;
           const filteredData =
             assets.length <= 3
               ? data
@@ -81,7 +94,6 @@ const Chart = ({
                   }
                 });
 
-          console.log(filteredData.length, "data points");
           setChartData(filteredData);
         };
 
@@ -104,6 +116,7 @@ const Chart = ({
             left: 20,
           }}
         >
+          {console.log("duration", Date.now() - debug_starttime)}
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="x"

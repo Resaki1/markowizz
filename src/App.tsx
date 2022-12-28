@@ -1,19 +1,24 @@
 import "./App.css";
-import { getAssets, getCorrelations } from "./helpers/calculations";
+import { getAssets } from "./helpers/calculations";
 import Chart from "./components/Chart";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import NewAsset from "./components/NewAsset";
 import { Asset, Correlations } from "./types/assets";
+import MyWorker from "./workers/worker?worker";
+import { wrap } from "comlink";
+
+const worker = new MyWorker();
+const api: any = wrap(worker);
 
 const App = () => {
   const [symbols, setSymbols] = useState<string[]>([
-    /* "MURGF",
+    "MURGF",
     "BAS.FRK",
     "INN1.FRK",
     "ALIZF",
-    "BAYA.FRK", */
-    /* "DAI.DEX",
-    "VNA.FRK",
+    "BAYA.FRK",
+    /* "DAI.DEX", */
+    /* "VNA.FRK",
     "DTG.FRK", */
   ]);
   const [isPending, startTransition] = useTransition();
@@ -24,6 +29,7 @@ const App = () => {
     correlations: {},
     assets: [],
   });
+  const startTime = useRef<number>(0);
 
   const addNewAsset = (newAsset: string) => {
     symbols
@@ -32,17 +38,12 @@ const App = () => {
   };
 
   useEffect(() => {
-    const fetchAssets = async () => {
-      return await getAssets(symbols);
-    };
-    const calcCorrelations = async (assets: Asset[]) => {
-      return await getCorrelations(assets);
-    };
+    startTime.current = Date.now();
 
-    fetchAssets().then((assets) => {
-      calcCorrelations(assets).then((correlations) => {
-        setData({ correlations, assets });
-      });
+    getAssets(symbols).then(async (assets) => {
+      await api.getCorrelations(assets);
+      const correlations: Correlations = await api.correlations;
+      setData({ correlations, assets });
     });
   }, [symbols]);
 
@@ -56,7 +57,11 @@ const App = () => {
       </ul>
       <NewAsset addNewAsset={addNewAsset} />
 
-      <Chart correlations={data.correlations} assets={data.assets} />
+      <Chart
+        correlations={data.correlations}
+        assets={data.assets}
+        debug_starttime={startTime.current}
+      />
     </div>
   );
 };
